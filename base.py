@@ -6,27 +6,25 @@ import robot
 p_dis = 0
 i_dis = 0
 d_dis = 0
-k_p_dis = 0.1
+k_p_dis = 0.07
 k_i_dis = 0.005
 k_d_dis = 0
 p_ang = 0
 i_ang = 0
 d_ang = 0
-k_p_ang = 120
+k_p_ang = 100
 k_i_ang = 3
 k_d_ang = 0
 p_baby = 0
-k_p_baby = 3
+k_p_baby = 5
 
-#  移动参数
 #  轮心距
-L1 = 13.328
+L1 = 10
 L2 = 12.802
 #  轮轴角
 a = 0.412
 #  传感器
-G = ([(-5, 7.8375), (-2, 7.8375), (0, 7.8375), (2, 7.8375), (5, 7.8375)],
-	 [(-4, -2), (-2, -2), (-2, 0), (0, 0), (2, 0), (2, -2), (4, -2)])
+G = ([(-5, 7.8375), (-2, 7.8375), (0, 7.8375), (2, 7.8375), (5, 7.8375)], [(-4, -2), (-2, 0), (0, 0), (2, 0), (4, -2)])
 
 #  基础参数
 pie = 3.1415926
@@ -50,33 +48,35 @@ def sqrt(a):
 
 
 def stop():
+	# 1/2/3号电机为移动电机
 	robot.set_motor(1, 0)
 	robot.set_motor(2, 0)
 	robot.set_motor(3, 0)
 
 
-def move(direction, angle, speed, time, distance, is_first):
+def move(direction, angle, speed, time=0, distance=0, is_first=0):
 	f0 = speed
 	b = direction
-	#  计算转速，逆时针为正
+	# 计算转速，逆时针为正
 	f1 = cos(a) * sin(b) * f0 - sin(a) * cos(b) * f0 + angle * L2 * 0.01
 	f2 = -cos(a) * sin(b) * f0 - sin(a) * cos(b) * f0 + angle * L2 * 0.01
 	f3 = cos(b) * f0 + angle * L1 * 0.01
-	#  执行
-	if is_first == 1:
+
+	# 执行
+	if is_first == 1:  # 缓慢提高转速(电机不支持小数)
 		stop()
 		for i in range(800):
 			robot.set_motor(3, f3 / 800 * (i + 1))
 			robot.set_motor(2, f2 / 800 * (i + 1))
 			robot.set_motor(1, f1 / 800 * (i + 1))
-	else:
+	else:  # 直接设置转速
 		robot.set_motor(3, f3)
 		robot.set_motor(2, f2)
 		robot.set_motor(1, f1)
 
-	if time != 0:
+	if time != 0:  # 移动time秒后退出
 		robot.sleep(time)
-	elif distance != 0:
+	elif distance != 0:  # 移动distance后退出
 		robot.reset_encoder(1)
 		robot.reset_encoder(2)
 		robot.reset_encoder(3)
@@ -90,40 +90,30 @@ def move(direction, angle, speed, time, distance, is_first):
 				break
 
 
-def get_result():
-	value = [[0, 0, 0, 0, 0, 10], [0, 0, 0, 0, 0, 0, 0, 10]]
-	# 读入并初步处理数据
+def get_sensor_data():
+	value = [[0, 0, 0, 0, 0, 10], [0, 0, 0, 0, 0, 10]]
+	# 读入数据
 	for i in range(5):
-		gray = robot.get_channel_gray(4, i + 1)
-		if gray >= 2000:
-			value[0][i] = 1
-	for i in range(7):
-		gray = robot.get_gray(11 - i)
-		if gray >= 2000:
-			value[1][i] = 1
-			# print(gray, i)
-
-	for i in range(5):  # 转换为长度
-		if value[0][i] == 1:
-			value[0][5] = i
-			break
-	for i in range(7):
-		if value[1][i] == 1:
-			value[1][7] = i
-			break
+		value[0][i] = robot.get_channel_gray(4, i + 1)
+	for i in range(5):
+		value[1][i] = robot.get_gray(i + 7)
+	# 转换为编号
+	priority = [2, 1, 3, 0, 4]  # 优先级高的通道为1时忽略其他通道读数
+	for i in range(2):
+		for j in range(5):
+			if value[i][priority[j]] > 2000:
+				value[i][5] = priority[j]
+				break
 	return value
 
 
-def processed_result():
-	# 转换为长度
-	value = get_result()
-
+def get_current_position(value):
 	#  转换为偏移量和偏航角
-	if value[0][5] == 10 or value[1][7] == 10:
+	if value[0][5] == 10 or value[1][5] == 10:
 		return 10, 10
 	else:
-		# 转换为坐标
-		g = [G[0][value[0][5]], G[1][value[1][7]]]
+		# 查表将编号转换为坐标
+		g = [G[0][value[0][5]], G[1][value[1][5]]]
 		# print (g)
 		if g[0][0] == g[1][0]:
 			return g[0][0], pie / 2
@@ -140,102 +130,153 @@ def processed_result():
 			return offset_distance, offset_angle
 
 
-def change_motor_state(speed, offsite_dis, offsite_ang):
+def change_motor_state(speed):
 	global k_p_dis, k_p_ang, p_dis, p_ang, k_i_dis, k_i_ang, i_dis, i_ang
-	a = processed_result()
-	print (a)
-	if a[0] == 10:
-		i_dis *= 0.9
-		i_ang *= 0.9
+	result = get_current_position(get_sensor_data())
+	print(result)
+	if result[0] == 10:
+		value = get_sensor_data()[0]
+		print(value[5])
+		if value[5] != 10:
+			distance = [-5, -2, 0, 2, 5]
+			global p_baby, k_p_baby
+			p_baby = distance[value[5]]
+			# robot.set_motor(1, cos(a) * speed - p_baby * k_p_baby)
+			# robot.set_motor(2, - cos(a) * speed - p_baby * k_p_baby)
+		else:
+			move(pie / 2, 0, 30)
 	else:
-		p_dis = -a[0] + offsite_dis
-		p_ang = a[1] + offsite_ang - pie / 2
-		i_dis += p_dis
-		i_ang += p_ang
-	move(p_dis * k_p_dis + i_dis * k_i_dis + p_ang + pie / 2, p_ang * k_p_ang + i_ang * k_i_ang, speed, 0, 0, 0)
+		p_dis = -result[0]
+		# p_ang = result[1] - pie / 2
+		# i_dis += p_dis
+		# i_ang += p_ang
+		# print(p_dis)
+		print(p_dis * k_p_dis + i_dis * k_i_dis + p_ang + pie / 2, p_ang * k_p_ang + i_ang * k_i_ang)
+		# print(p_dis)
+		move(p_dis * k_p_dis + i_dis * k_i_dis + p_ang + pie / 2, p_ang * k_p_ang + i_ang * k_i_ang, speed, 0, 0, 0)
 
 
-# move(pie / 2, p_ang * k_p_ang + i_ang * k_i_ang, speed, 0, 0, 0)
-# move(p_dis * k_p_dis + i_dis * k_i_dis + p_ang + pie / 2, 0, speed, 0, 0, 0)
-
-
-def line_navigation(speed, offsite_dis, offsite_ang, time):
+def line_navigation(speed, time=0):
 	robot.reset_timer(0)
-	change_motor_state(speed, offsite_dis, offsite_ang)
-	while robot.get_timer_ms(0) < time * 1000:
-		change_motor_state(speed, offsite_dis, offsite_ang)
+	# change_motor_state(speed)
+	baby_change(speed)
+	if time != 0:
+		while robot.get_timer_ms(0) < time * 1000:
+			baby_change(speed)
 
 
-def baby_change(speed, offsite_dis, offsite_ang):
-	global p_baby, k_p_baby
-	value = get_result()[0]
-	for i in range(5):
-		if value[i] == 1:
-			p_baby = 1 / 6 * i ** 3 - i ** 2 + 23 / 6 * i - 5
-			break
-	robot.set_motor(1, cos(a) * speed - p_baby * k_p_baby)
-	robot.set_motor(2, - cos(a) * speed - p_baby * k_p_baby)
+def baby_change(speed):
+	value = get_sensor_data()[0]
+	if value[5] != 10:
+		distance = [-5, -2, 0, 2, 5]
+		global p_baby, k_p_baby
+		p_baby = distance[value[5]]
+		robot.set_motor(1, cos(a) * speed - p_baby * k_p_baby)
+		robot.set_motor(2, - cos(a) * speed - p_baby * k_p_baby)
+	else:
+		move(pie / 2, 0, speed)
 
 
-def baby_navigation(speed, offsite_dis, offsite_ang, time):
+def baby_navigation(speed, time=0):
 	robot.reset_timer(1)
-	baby_change(speed, offsite_dis, offsite_ang)
+	baby_change(speed)
 	while robot.get_timer_ms(1) < time * 1000:
-		baby_change(speed, offsite_dis, offsite_ang)
+		baby_change(speed)
 
 
-def navigate_to(speed, offsite_dis, offsite_angle, is_cross):
+# 如果初始状态前排传感器外侧通道识别到线就往前以移动至脱离
+def navigate_to(speed):
+	global p_dis, p_ang, p_baby
+	p_dis = 0
+	p_ang = 0
+	p_baby = 0
+	value = get_sensor_data()
+	if value[0][0] > 2000 or value[0][4] > 2000:
+		while value[0][0] > 2000 or value[0][4] > 2000:
+			line_navigation(speed)
+			value = get_sensor_data()
+	value = get_sensor_data()
+	while value[0][0] < 2000 and value[0][4] < 2000:
+		line_navigation(30)
+		value = get_sensor_data()
+
+
+def baby_navigate_to(speed, is_cross, offsite_dis=0, offsite_ang=0):
+	global p_baby
+	p_baby = 0
 	if is_cross != 0:
-		get_out(speed)
-	while True:
-		line_navigation(speed, offsite_dis, offsite_angle, 0)
-		if robot.get_channel_gray(4, 1) > 2000 or robot.get_channel_gray(4, 5) > 2000:
-			break
+		move(pie / 2, 0, speed)
+		value = get_sensor_data()
+		while value[0][0] == 1 or value[0][4] == 1:
+			value = get_sensor_data()
+	value = get_sensor_data()
+	# 集成传感器0/4任意一个碰到黑线退出
+	while value[0][0] == 0 and value[0][4] == 0:
+		value = get_sensor_data()
+		baby_change(30)
 
 
 def left():
+	# 先向前走一点 encoder 500
 	move(pie / 2, 0, 30, 0, 600, 0)
+	stop()
 	i = 300
-	for j in range(3):
-		move(0, i, 0, 0, 0, 0)
-		i *= 0.997
-	robot.sleep(0.3)
-	while get_result()[0][2] == 0:
+	while get_sensor_data()[0][5] != 10:
 		for j in range(3):
 			move(0, i, 0, 0, 0, 0)
-			i *= 0.997
+			i *= 0.999
+	while get_sensor_data()[0][2] < 2000:
+		for j in range(3):
+			move(0, i, 0, 0, 0, 0)
+			i *= 0.999
 	stop()
 	robot.sleep(0.1)
 
 
 def right():
 	move(pie / 2, 0, 30, 0, 600, 0)
+	stop()
 	i = -300
-	for j in range(3):
-		move(0, i, 0, 0, 0, 0)
-		i *= 0.997
-	robot.sleep(0.3)
-	while get_result()[0][2] == 0:
+	while get_sensor_data()[0][5] != 10:
 		for j in range(3):
 			move(0, i, 0, 0, 0, 0)
-			i *= 0.997
+			i *= 0.999
+	while get_sensor_data()[0][2] < 2000:
+		for j in range(3):
+			move(0, i, 0, 0, 0, 0)
+			i *= 0.999
 	stop()
 	robot.sleep(0.1)
 
 
+# 用前排集成传感器巡线一直等到后排传感器5/11都识别不到线
 def get_out(speed):
-	while robot.get_gray(5) < 2000 and robot.get_gray(11) < 2000:
-		baby_change(30, 0, 0)
-	while robot.get_gray(5) > 2000 or robot.get_gray(11) > 2000:
-		baby_change(30, 0, 0)
+	# 当7/11传感器识别都识别不到的时候，用前排集成传感器巡线
+	while robot.get_gray(7) < 2000 and robot.get_gray(11) < 2000:
+		baby_change(30)
+	# 当7/11传感器都识别不到线的时候，用前排集成传感器继续巡线
+	while robot.get_gray(7) > 2000 or robot.get_gray(11) > 2000:
+		baby_change(30)
 
 
 def leave():
 	move(pie / 2, 0, 30, 0, 0, 1)
+	# 等待集成port 4， channel 2 （集成中间传感器） 找到黑线
+	wait_for(4, 2, 1, 0)
+	value = get_sensor_data()
+	# 等待集成传感器外侧两个都离开黑线
+	while value[0][5] == 0 or value[0][5] == 4:
+		value = get_sensor_data()
+
+	# 等待独立传感器5、11 任意一个碰到黑线
 	while robot.get_gray(5) < 2500 and robot.get_gray(11) < 2500:
-		pass
-	while robot.get_gray(5) > 2500 and robot.get_gray(11) > 2500:
-		pass
+		baby_change(30)
+
+	# 等待独立传感器5、11 都离开黑线
+	while robot.get_gray(5) > 2000 or robot.get_gray(11) > 2000:
+		baby_change(30)
+
+	# print(get_result())
 
 
 def stop_and_sleep():
@@ -246,64 +287,73 @@ def stop_and_sleep():
 def wait_for(port, channel, condition, wait):
 	robot.sleep(wait)
 	if port == 4:
-		while get_result()[0][channel] != condition:
+		while get_sensor_data()[0][channel] < 2000:
 			pass
 	else:
-		while get_result()[1][port] != condition:
+		while get_sensor_data()[1][channel] < 2000:
 			pass
+
+def line_find(position):
+	return position[0] != 10
+
+
+def turn_to_find_line():
+	if line_find(get_current_position(get_sensor_data())):
+		return
+	robot.reset_timer(2)
+	move(0, 100, 0, 0, 0, 0)
+	while robot.get_timer_ms(2) < 1000:
+		if line_find(get_current_position(get_sensor_data())):
+			stop()
+			print(get_sensor_data())
+			return
+	robot.reset_timer(2)
+	move(0, -100, 0, 0, 0, 0)
+	while robot.get_timer_ms(2) < 1000:
+		if line_find(get_current_position(get_sensor_data())):
+			stop()
+			print(get_sensor_data())
+			return
+
+
+def do_correction():
+	result = get_current_position(get_sensor_data())
+	if not line_find(result):
+		print("failed to find line before correction")
+		print(get_sensor_data())
+		return
+	if result[0] > 0:
+		move(result[1] - pie / 2, 0, 10, 0, 0, 1)
+	elif result[0] < 0:
+		move(result[1] + pie / 2, 0, 10, 0, 0, 1)
+	wait_for(0, 2, 1, 0)
+	stop_and_sleep()
+	# 旋转直到转正
+	if (result[1] - pie / 2) > 0:  # 判断向左转还是向右转
+		move(0, 50, 0, 0, 0, 1)
+	elif (result[1] - pie / 2) < 0:
+		move(0, -50, 0, 0, 0, 1)
+	else:
+		stop()
+		return
+	robot.reset_timer(2)
+	while robot.get_timer_ms(2) < 3000:  # 三秒内如果转不正就退出
+		result = get_current_position(get_sensor_data())
+		if line_find(result):  # 每次识别到线对旋转方向进行一次更正
+			if (result[1] - pie / 2) > 0:
+				move(0, 50, 0, 0, 0, 0)
+			elif (result[1] - pie / 2) < 0:
+				move(0, -50, 0, 0, 0, 0)
+			else:
+				stop()
+				return
 
 
 def correction():
-	result = processed_result()
-	if result[0] != 10:  # 如果能找到线
-		# 平移直到中心点在线上
-		if result[0] > 0:
-			move(result[1] - pie / 2, 0, 10, 0, 0, 1)
-		elif result[0] < 0:
-			move(result[1] + pie / 2, 0, 10, 0, 0, 1)
-		wait_for(3, 0, 1, 0)
-		robot.sleep(0.1)
-		stop_and_sleep()
-		# 旋转直到转正
-		if result[1] - pie / 2 > 0:
-			move(0, 50, 0, 0, 0, 1)
-		elif result[1] - pie / 2 < 0:
-			move(0, -50, 0, 0, 0, 1)
-		else:
-			return
-		robot.reset_timer(2)
-		while robot.get_timer_ms(2) < 3000:  # 三秒内如果转不正就退出
-			result = processed_result()
-			if result[1] != 10:  # 每次识别到线对旋转方向进行一次更正
-				if result[1] - pie / 2 > 0:
-					move(0, 50, 0, 0, 0, 0)
-				elif result[1] - pie / 2 < 0:
-					move(0, -50, 0, 0, 0, 0)
-				else:
-					robot.sleep(0.2)
-					stop()
-					return
-	else:  # 否则左右转弯直到找到线（找不到线会挂）
-		robot.reset_timer(3)
-		robot.reset_timer(2)
-		move(0, 100, 0, 0, 0, 0)
-		while robot.get_timer_ms(2) < 1000:
-			if processed_result()[0] != 10:
-				correction()  # 找到线后进行矫正
-				return
-		while robot.get_timer_ms(3) < 5000:  # 限时五秒内找到线
-			robot.reset_timer(2)
-			move(0, -100, 0, 0, 0, 0)
-			while robot.get_timer_ms(2) < 2000:
-				if processed_result()[0] != 10:
-					correction()  # 找到线后进行矫正
-					return
-			robot.reset_timer(2)
-			move(0, 100, 0, 0, 0, 0)
-			while robot.get_timer_ms(2) < 2000:
-				if processed_result()[0] != 10:
-					correction()  # 找到线后进行矫正
-					return
-
+	turn_to_find_line()
+	do_correction()
+	value = get_sensor_data()
+	if value[0][2] < 3000 or value[1][2] < 3000:
+		do_correction()
 
 
