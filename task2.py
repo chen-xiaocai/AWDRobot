@@ -2,72 +2,56 @@ import robot
 from task1 import *
 from correct import *
 
-def complete_1(place):
-	if place == 1:
-		pass
-	elif place == 10:
-		line_navigation(20, 0.5)
 
-
-def complete_2(place):
-	ability = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-	if place in ability:
-		line_navigation(20, 0.5)
-		stop()
-		robot.reset_encoder(4)
-		robot.set_motor(4, 100)
-		while robot.get_encoder(4) < 1100:
-			pass
-		robot.set_motor(4, 0)
-
-
-def complete_3(place, direction):
-	if direction == 1:
-		ability = [1, 3, 4, 5, 6, 9]
-		if place in ability:  # 无需矫正的
-			line_navigation(20, 1)
-			move(-pie / 2, 0, 20, 0.2)
-			move(pie / 2, 0, 100, 0.5)
-			stop()
-		ability = [10]
+def complete_1(place, direction):
+	if direction == 0 or direction == 2:
+		ability = [1, 2, 3, 4, 5, 6, 7, 9, 10]
 		if place in ability:
-			line_navigation(20, 0.3)
-			correction()
-			move(0, 0, 20, 0.3)
-			correction()
-			stop_and_sleep()
-			line_navigation(30, 0.5)
-			stop()
-		ability = [2]
+			line_navigation(20, 1.5)
+		ability = [8]
 		if place in ability:
-			line_navigation(20, 0.1)
-			correction()
-			move(0, 0, 20, 0.3)
-			correction()
-			stop_and_sleep()
-			line_navigation(30, 1.5)
-			stop()
-		ability = [7]
+			line_navigation(20, 2.5)
+
+
+def complete_2(place, direction):
+	if direction == 0:
+		ability = [1, 2, 3, 4, 5, 6, 7, 9, 10]
 		if place in ability:
-			correction()
-			move(0, 0, 20, 0.3)
-			stop()
-			move(0, -100, 0, 0.3)
+			line_navigation(20, 0.8)
 			stop_and_sleep()
-			correction()
+			move(0, 0, 20, 0.1)
 			stop_and_sleep()
-			line_navigation(30, 1)
-			stop()
+			robot.reset_encoder(4)
+			robot.set_motor(4, 100)
+			while robot.get_encoder(4) < 1100:
+				pass
+			robot.set_motor(4, 0)
 		ability = [8]
 		if place in ability:
 			line_navigation(20, 1.5)
-			correction()
-			move(0, 0, 20, 0.3)
-			correction()
 			stop_and_sleep()
-			line_navigation(30, 1)
-			stop()
-	elif direction == 3:
+			move(0, 0, 20, 0.1)
+			stop_and_sleep()
+			robot.reset_encoder(4)
+			robot.set_motor(4, 100)
+			while robot.get_encoder(4) < 1100:
+				pass
+			robot.set_motor(4, 0)
+
+
+def complete_3(place, direction):
+	print(place, direction)
+	robot.sleep(1)
+	if direction == TASK_DIR_FRONT:
+		correction()
+		if place == 8:
+			line_navigation(20, 2)
+		else:
+			line_navigation(20, 1)
+		move(-pie / 2, 0, 20, 0.2)
+		move(pie / 2, 0, 100, 0.5)
+		stop()
+	elif direction == 2:
 		ability = [1, 2, 3, 8, 9, 10]
 		if place in ability:  # 前排传感器大约在路口
 			line_navigation(15, 1.5)
@@ -126,42 +110,42 @@ def complete_3(place, direction):
 			stop()
 
 
-def finish_1(place, direction):
-	if direction == 1 or direction == 3:
-		# 前往
-		move_to(place)
-		stop()
-		# robot.sleep(3)
-		# # 完成
-		complete_1(place)
-		# # 返回
-		# go_back(place)
+# def finish_1(place, direction):
+# 	if direction == 1 or direction == 3:
+# 		# 前往
+# 		move_to(place)
+# 		stop()
+# 		# robot.sleep(3)
+# 		# # 完成
+# 		complete_1(place)
+# 		# # 返回
+# 		# go_back(place)
+#
+#
+# def finish_2(place, direction):
+# 	if direction == 1:
+# 		# 前往
+# 		move_to(place)
+# 		stop()
+# 		# # 完成
+# 		complete_2(place)
+# 		# # 返回
+# 		# go_back(place)
+#
+#
+# def finish_3(place, direction):
+# 	if direction == 1 or direction == 3:
+# 		# 前往
+# 		move_to(place)
+# 		stop_and_sleep()
+# 		# 完成
+# 		complete_3(place, direction)
+# 		# 返回
+# 		go_back(place)
 
 
-def finish_2(place, direction):
-	if direction == 1:
-		# 前往
-		move_to(place)
-		stop()
-		# # 完成
-		complete_2(place)
-		# # 返回
-		# go_back(place)
-
-
-def finish_3(place, direction):
-	if direction == 1 or direction == 3:
-		# 前往
-		move_to(place)
-		stop_and_sleep()
-		# 完成
-		complete_3(place, direction)
-		# 返回
-		go_back(place)
-
-
-def finish_11(task):
-	if task == 1:
+def do_complete_task_pos11(task):
+	if task == TASK_ID_11_Y:
 		move(0, 0, 10, 3.2, 0, 1)
 		stop_and_sleep()
 		move(pie / 2, 0, 10, 2, 0, 1)
@@ -176,7 +160,7 @@ def finish_11(task):
 		robot.set_motor(4, 0)
 		move(pie, 0, 50, 0.5)
 		stop()
-	elif task == 2:
+	elif task == TASK_ID_11_R:
 		move(pie / 2, 0, 20, 0.5)
 		navigate_to_next_cross(20)
 		move(-pie / 2, 0, 10, 0.5, 0, 1)
@@ -193,7 +177,7 @@ def finish_11(task):
 		robot.set_motor(4, 0)
 		move(-pie / 2, 0, 30, 0.5)
 		stop()
-	if task == 3:
+	elif task == TASK_ID_11_B:
 		add_event(1103)
 		move_to_11()  # 前往
 		line_navigation(20, 0.3)  # 完成任务
@@ -240,7 +224,7 @@ def finish_11(task):
 		move(1.9, 0, 50, 1.5)
 		stop()
 
-	if task == 4:
+	elif task == 4:
 		leave_base()
 		navigate_to_next_cross(30)
 		move(pie / 2, 0, 30, 0, 0, 0)
@@ -252,18 +236,102 @@ def finish_11(task):
 		get_out(20)
 		line_navigation(10, 1)
 		stop()
+	else:
+		raise  ValueError("invalid task:{}".format(task))
 
 
+TASK_DIR_FRONT = 0
+TASK_DIR_LEFT = 1
+TASK_DIR_RIGHT = 2
+TASK_DIR_BACK = 3
 
+TASK_ID_1 = 0 		# 一号任务
+TASK_ID_2 = 1 		# 二号任务
+TASK_ID_3 = 2 		# 三号任务
+TASK_ID_11_R = 3 	# 11号位置红色方块落脚点闸门
+TASK_ID_11_Y = 4 	# 11号位置黄色方块落脚点闸门
+TASK_ID_11_B = 5    # 11号位置旋转门大任务
+TASK_ID_X1 = 6		# 现场任务1
+TASK_ID_X2 = 7		# 现场任务2
+
+
+def execute_task(position, task_id, direction):
+	if task_id == TASK_ID_1:
+		complete_1(position, direction)
+	elif task_id == TASK_ID_2:
+		complete_2(position, direction)
+	elif task_id == TASK_ID_3:
+		complete_3(position, direction)
+	else:
+		pass
 
 
 def main():
+	task_list = [
+		[1, TASK_ID_3, TASK_DIR_FRONT, "3_1"],
+		[2, TASK_ID_3, TASK_DIR_FRONT, "3_2"],
+		[3, TASK_ID_3, TASK_DIR_FRONT, "3_3"],
+		[4, TASK_ID_3, TASK_DIR_FRONT, "3_4"],
+		[5, TASK_ID_3, TASK_DIR_FRONT, "3_5"],
+		[6, TASK_ID_3, TASK_DIR_FRONT, "3_6"],
+		[7, TASK_ID_3, TASK_DIR_FRONT, "3_7"],
+		[8, TASK_ID_3, TASK_DIR_FRONT, "3_8"],
+		[9, TASK_ID_3, TASK_DIR_FRONT, "3_9"],
+		[10, TASK_ID_3, TASK_DIR_FRONT, "3_10"],
 
-	init_event()
-	move_to_1()
-	complete_2(1)
-	go_back_1()
-	print_event()
+		# [2, TASK_ID_2, TASK_DIR_FRONT, '2_2'],
+		# [3, TASK_ID_3, TASK_DIR_FRONT, "3_3"],
+		# [11, TASK_ID_11_R, TASK_DIR_FRONT, "11_R"],
+		# [11, TASK_ID_11_Y, TASK_DIR_FRONT, "11_Y"],
+		# [11, TASK_ID_11_B, TASK_DIR_FRONT, "11_B"],
+
+		# [4, TASK_ID_X1, TASK_DIR_FRONT],
+		# [5, TASK_ID_X2, TASK_DIR_FRONT],
+
+		[999, 999, 0, "EVENT"]
+	]
+
+	task_id, pos, direction = 0, 0, 0
+
+	next_task_index = 0
+	while True:
+		print("TASK To DO: ", task_list[next_task_index][3])
+		while True:
+			if robot.check_key(1) == 1:  # Enter
+				pos, task_id, direction, name = task_list[next_task_index]
+				if next_task_index < (len(task_list) - 1):
+					next_task_index += 1
+				break
+			elif robot.check_key(2) == 1:  # LEFT
+				if next_task_index > 0:
+					next_task_index -= 1
+				print("TASK TO DO: ", task_list[next_task_index][3])
+				robot.sleep(0.3)
+				continue
+			elif robot.check_key(3) == 1:  # right
+				if (next_task_index + 1) < len(task_list):
+					next_task_index += 1
+				print("TASK_TO_DO: ", task_list[next_task_index][3])
+				robot.sleep(0.3)
+				continue
+			else:
+				pass
+
+		if TASK_ID_1 <= task_id <= TASK_ID_3:
+			init_event()
+			move_to(pos)  # share by all position and task
+			execute_task(pos, task_id, direction)
+			go_back(pos)
+		elif TASK_ID_11_R <= task_id <= TASK_ID_11_B:
+			init_event()
+			do_complete_task_pos11(task_id)
+		elif task_id == TASK_ID_X1:
+			pass
+		elif task_id == TASK_ID_X2:
+			pass
+		else:
+			robot.sleep(1)
+			print_event()
 
 
 main()

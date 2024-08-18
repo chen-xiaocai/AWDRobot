@@ -158,7 +158,7 @@ def change_motor_state(speed):
 		move(p_dis * k_p_dis + i_dis * k_i_dis + p_ang + pie / 2, p_ang * k_p_ang + i_ang * k_i_ang, speed, 0, 0, 0)
 
 
-def line_navigation(speed, time=0):
+def line_navigation(speed, time=0.0):
 	robot.reset_timer(0)
 	# change_motor_state(speed)
 	baby_change(speed)
@@ -175,6 +175,7 @@ def baby_change(speed):
 		p_baby = distance[value[5]]
 		robot.set_motor(1, cos(a) * speed - p_baby * k_p_baby)
 		robot.set_motor(2, - cos(a) * speed - p_baby * k_p_baby)
+		robot.set_motor(3, 0)
 	else:
 		move(pie / 2, 0, speed)
 
@@ -195,7 +196,7 @@ def navigate_to_next_cross(speed):
 	value = get_sensor_data()
 	if value[0][0] > 2000 or value[0][4] > 2000:
 		while value[0][0] > 2000 or value[0][4] > 2000:
-			line_navigation(speed)
+			line_navigation(speed, 0.5)
 			value = get_sensor_data()
 	value = get_sensor_data()
 	while value[0][0] < 2000 and value[0][4] < 2000:
@@ -321,6 +322,7 @@ events = []
 
 
 def init_event():
+	global events
 	events = []
 	robot.reset_timer(3)
 
@@ -330,11 +332,13 @@ def add_event(event_id):
 
 
 def print_event():
+	robot.sleep(0.5)
 	print("start")
 	event = -1
 	while True:
 		if robot.check_key(1) == 1:
 			print("end")
+			robot.sleep(0.5)
 			return
 		elif robot.check_key(2) == 1:
 			if event > 0:

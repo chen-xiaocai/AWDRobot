@@ -122,3 +122,6 @@ def get_gray(port):
 # 	thread.start()
 
 # start_sensor_thread()
+
+def check_key(key_id):
+	return 1
