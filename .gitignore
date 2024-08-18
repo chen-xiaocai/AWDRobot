@@ -1,2 +1,8 @@
 
 .idea
+__pycache__/base.cpython-312.pyc
+__pycache__/base.cpython-312.pyc
+__pycache__/correct.cpython-312.pyc
+__pycache__/task1.cpython-312.pyc
+/__pycache__
+*.pyc
