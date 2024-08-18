@@ -199,7 +199,7 @@ def navigate_to_next_cross(speed):
 			value = get_sensor_data()
 	value = get_sensor_data()
 	while value[0][0] < 2000 and value[0][4] < 2000:
-		line_navigation(30)
+		line_navigation(speed)
 		value = get_sensor_data()
 
 
@@ -316,45 +316,6 @@ def turn_to_find_line():
 			return
 
 
-def do_correction():
-	result = get_current_position(get_sensor_data())
-	if not line_find(result):
-		print("failed to find line before correction:", get_sensor_data())
-		return
-	if result[0] > 0:
-		move(result[1] - pie / 2, 0, 10, 0, 0, 1)
-	elif result[0] < 0:
-		move(result[1] + pie / 2, 0, 10, 0, 0, 1)
-	sleep_until(0, 2, 1, 0)
-	stop_and_sleep()
-	# 旋转直到转正
-	if (result[1] - pie / 2) > 0:  # 判断向左转还是向右转
-		move(0, 50, 0, 0, 0, 1)
-	elif (result[1] - pie / 2) < 0:
-		move(0, -50, 0, 0, 0, 1)
-	else:
-		stop()
-		return
-	robot.reset_timer(2)
-	while robot.get_timer_ms(2) < 3000:  # 三秒内如果转不正就退出
-		result = get_current_position(get_sensor_data())
-		if line_find(result):  # 每次识别到线对旋转方向进行一次更正
-			if (result[1] - pie / 2) > 0:
-				move(0, 50, 0, 0, 0, 0)
-			elif (result[1] - pie / 2) < 0:
-				move(0, -50, 0, 0, 0, 0)
-			else:
-				stop()
-				return
-
-
-def correction():
-	turn_to_find_line()
-	do_correction()
-	value = get_sensor_data()
-	if value[0][2] < 3000 or value[1][2] < 3000:
-		do_correction()
-
 
 events = []
 
@@ -370,10 +331,24 @@ def add_event(event_id):
 
 def print_event():
 	print("start")
-	for event in events:
-		for data in event:
-			while robot.check_key(1) == 0:
-				continue
-			print(data)
+	event = -1
+	while True:
+		if robot.check_key(1) == 1:
+			print("end")
+			return
+		elif robot.check_key(2) == 1:
+			if event > 0:
+				event -= 1
+				for data in events[event]:
+					print(data)
+			else:
+				print("out_of_range")
 			robot.sleep(0.5)
-	print("end")
+		elif robot.check_key(3) == 1:
+			if event < len(events) - 1:
+				event += 1
+				for data in events[event]:
+					print(data)
+				robot.sleep(0.5)
+			else:
+				print("out_of_range")

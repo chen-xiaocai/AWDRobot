@@ -1,6 +1,6 @@
 import robot
 from task1 import *
-
+from correct import *
 
 def complete_1(place):
 	if place == 1:
@@ -10,9 +10,8 @@ def complete_1(place):
 
 
 def complete_2(place):
-	if place == 1:
-		pass
-	elif place == 10:
+	ability = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+	if place in ability:
 		line_navigation(20, 0.5)
 		stop()
 		robot.reset_encoder(4)
@@ -175,30 +174,72 @@ def finish_11(task):
 		robot.set_motor(4, 100)
 		robot.sleep(0.07)
 		robot.set_motor(4, 0)
+		move(pie, 0, 50, 0.5)
+		stop()
 	elif task == 2:
-		move(pie / 2, 0, 10, 3, 0, 1)
+		move(pie / 2, 0, 20, 0.5)
+		navigate_to_next_cross(20)
+		move(-pie / 2, 0, 10, 0.5, 0, 1)
 		stop_and_sleep()
 		move(0, 0, 10, 0.9, 0, 1)
-		robot.set_motor(4, -50)
-		robot.sleep(0.15)
+		stop()
+		robot.set_motor(4, -100)
+		robot.sleep(0.07)
 		robot.set_motor(4, 0)
+		move(pie, 0, 10, 0.3)
+		stop_and_sleep()
+		robot.set_motor(4, -100)
+		robot.sleep(0.07)
+		robot.set_motor(4, 0)
+		move(-pie / 2, 0, 30, 0.5)
 		stop()
 	if task == 3:
+		add_event(1103)
 		move_to_11()  # 前往
 		line_navigation(20, 0.3)  # 完成任务
-		correction()
-		line_navigation(10, 2)
+		stop()
+		add_event(1)
+		correction()  # 矫正
+		add_event(2)
+		stop()
+		robot.sleep(2)
+		line_navigation(30, 1)  # 捅方块
 		stop_and_sleep()
-		robot.set_motor(4, 100)
+		robot.set_motor(4, 100)  # 转摇杆
 		robot.sleep(1.8)
 		robot.set_motor(4, 0)
-		move(-pie / 2, 0, 10, 0.5)
+		move(-pie / 2, 0, 10, 0.8)  # 前往黄色方块任务区域
 		stop_and_sleep()
-		move(0, 0, 10)
+		move(0, 0, 20)  # 向右平移
 		sleep_until(4, 2, 1, 0.5)
 		stop_and_sleep()
+		add_event(3)
 		navigate_to_next_cross(30)
+		add_event(4)
+		get_out(20)
+		add_event(5)
+		correction()
+		add_event(6)
+		line_navigation(20, 0.9)  # 到黄色方块旁边
+		move(0, 300, 0, 0.5)  # 转向黄色方块
+		stop_and_sleep()
+		move(pie / 2, 0, 20, 0.7)  # 捅黄色方块,反复捅确保捅下
+		move(-pie / 2, 0, 20, 0.3)
+		move(0, 0, 20, 0.3)
+		move(pie / 2, 0, 20, 0.5)
+		move(-pie / 2, 0, 20, 0.5)  # 返回
+		move(0, -300, 0, 0.5)
+		stop_and_sleep()
+		navigate_to_next_cross(30)
+		add_event(7)
+		line_navigation(30, 0.5)
+		navigate_to_next_cross(30)
+		add_event(8)
+		navigate_turn_left()
+		add_event(9)
+		move(1.9, 0, 50, 1.5)
 		stop()
+
 	if task == 4:
 		leave_base()
 		navigate_to_next_cross(30)
@@ -213,22 +254,16 @@ def finish_11(task):
 		stop()
 
 
+
+
+
 def main():
+
 	init_event()
-	move_to_10()
-	complete_3(10, 1)
-	go_back_10()
+	move_to_1()
+	complete_2(1)
+	go_back_1()
 	print_event()
 
-	# while True:
-	# 	if robot.check_key(1):
-	# 		print(get_sensor_data())
-	# 	robot.sleep(1)
-
-	# while True:
-	# 	move(0, 0, 20, 2)
-	# 	stop_and_sleep()
-	# 	move(pie, 0, 20, 2)
-	# 	stop_and_sleep()
 
 main()

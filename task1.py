@@ -1,5 +1,6 @@
 import robot
 from base import *
+from correct import *
 
 
 def move_to_1():  # 无特殊要求	后排传感器在路口上，难以准确脱离，20速度向前巡线0.3秒后可以做矫正
@@ -281,7 +282,6 @@ def move_to_10():  # 无特殊要求	后排传感器脱离路口
 
 def move_to_11():  # 1、3号轮贴边	后排传感器脱离路口
 	leave_base()
-	add_event(1)
 	navigate_to_next_cross(30)
 	add_event(2)
 	move(pie / 2, 0, 30, 0, 0, 0)
@@ -295,6 +295,7 @@ def move_to_11():  # 1、3号轮贴边	后排传感器脱离路口
 	add_event(4)
 	navigate_to_next_cross(30)
 	add_event(5)
+	line_navigation(30, 0.5)
 	navigate_to_next_cross(30)
 	add_event(6)
 	navigate_turn_right()
