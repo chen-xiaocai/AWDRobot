@@ -59,13 +59,11 @@ def go_back_5():  # 顶着任务(最好)
 
 
 def go_back_6():  # 顶到任务，7号位为横
-	move(-pie / 2, 0, 20, 0.3, 0, 1)
-	move(0, 300, 0, 1)
-	stop_and_sleep()
-	move(-pie / 2, 0, 20, 0.7)
-	navigate_to_next_cross(30)
-	navigate_turn_left()
-	navigate_to_next_cross(30)
+	move(-pie / 2, 0, 20)
+	sleep_until(4, 4, 1, 0)
+	move(pie / 2, 0, 20, 0.2)
+	navigate_turn_right()
+	navigate_to_next_cross(20)
 	move(pie, 0, 20, 0.7)
 	stop_and_sleep()
 	move(pie / 2, 0, 50, 1.5)

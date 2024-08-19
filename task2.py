@@ -203,4 +203,3 @@ def move_to_10_side():
 	move(-pie / 2, 0, 20, 0.3)
 	move(pie, 0, 20, 1.5)
 	stop()
-

@@ -52,63 +52,51 @@ def complete_3(place, direction):
 		move(-pie / 2, 0, 20, 0.2)
 		move(pie / 2, 0, 100, 0.5)
 		stop()
-	elif direction == TASK_DIR_RIGHT:
-		ability = [1, 2, 3, 8, 9, 10]
-		if place in ability:  # 前排传感器大约在路口
-			line_navigation(15, 1.5)
-			correction()
-			robot.set_motor(1, 100)
-			robot.set_motor(2, -100)
+	elif direction == TASK_DIR_BACK:
+		correction()
+		if place == 8:
+			line_navigation(20, 2)
+		else:
+			line_navigation(20, 1)
+		# 往后退一定距离，准备动作
+		move(-pie / 2, 0, 10, 0.4, 0, 1)  # 退后一点点
+		stop_and_sleep()
+		correction()
+
+		# 第一次往下啄
+		robot.set_motor(4, 10)  # 向下啄
+		robot.sleep(1.3)
+		robot.set_motor(4, -50)  # 抬起鸡嘴
+		robot.sleep(0.13)
+		robot.set_motor(4, 0)
+		stop_and_sleep()
+
+		# 前进到底顶住道具
+		line_navigation(15, 0.5)
+		correction()
+		move(pie / 2, 0, 10)
+
+		# 开始钩道具动作
+		for i in range(3):  # 反复通红色方块使其归位
+			robot.set_motor(4, 6)  # 向下啄
+			robot.sleep(0.8)
+			robot.set_motor(4, -3)
 			robot.sleep(0.5)
-			stop_and_sleep()
-			correction()
-
-			# 往后退一定距离，准备动作
-			move(-pie / 2, 0, 10, 0.4, 0, 1)  # 退后一点点
-			stop_and_sleep()
-			correction()
-
-			# 第一次往下啄
-			robot.set_motor(4, 10)  # 向下啄
-			robot.sleep(1.3)
-			robot.set_motor(4, -50)  # 抬起鸡嘴
-			robot.sleep(0.13)
+			robot.set_motor(4, -100)  # 抬起鸡嘴
+			robot.sleep(0.03)
 			robot.set_motor(4, 0)
 			stop_and_sleep()
+		robot.set_motor(4, 6)  # 钩住
+		robot.sleep(0.6)
+		robot.set_motor(4, 0)
 
-			# 前进到底顶住道具
-			line_navigation(15, 0.5)
-			robot.set_motor(1, 100)
-			robot.set_motor(2, -100)
-			robot.sleep(0.5)
-			stop_and_sleep()
-			correction()
-			move(0, 0, 10, 0.2, 0, 1)
-			stop()
-			correction()
-			stop_and_sleep()
-			move(pie / 2, 0, 10)
+		# 往后退
+		move(-pie / 2, 0, 10, 0, 0, 1)  # 往后退将红方块拉出
+		robot.sleep(1)
 
-			# 开始钩道具动作
-			for i in range(3):  # 反复通红色方块使其归位
-				robot.set_motor(4, 6)  # 向下啄
-				robot.sleep(0.8)
-				robot.set_motor(4, -3)
-				robot.sleep(0.5)
-				robot.set_motor(4, -100)  # 抬起鸡嘴
-				robot.sleep(0.03)
-				robot.set_motor(4, 0)
-				stop_and_sleep()
-			robot.set_motor(4, 6)  # 钩住
-			robot.sleep(0.7)
-			robot.set_motor(4, 1)
-
-			# 往后退
-			move(-pie / 2, 0, 10, 0, 0, 1)  # 往后退将红方块拉出
-			robot.sleep(0.1)
-			robot.set_motor(4, 0)
-			robot.sleep(2)
-			stop()
+		# 往前走适配goback
+		move(pie / 2, 0, 20, 1)
+		stop()
 
 
 # def finish_1(place, direction):
@@ -215,9 +203,7 @@ def do_complete_task_pos11(task):
 		move(-pie / 2, 0, 20, 0.5)  # 返回
 		move(0, -300, 0, 0.5)
 		stop_and_sleep()
-		navigate_to_next_cross(30)
-		add_event(7)
-		line_navigation(30, 0.5)
+		line_navigation(30, 1)
 		navigate_to_next_cross(30)
 		add_event(8)
 		navigate_turn_left()
@@ -280,44 +266,22 @@ def execute_task(position, task_id, direction):
 
 def main():
 	task_list = [
-		[1, TASK_ID_1, TASK_DIR_FRONT, "1_1"],
-		[2, TASK_ID_1, TASK_DIR_FRONT, "1_2"],
-		[3, TASK_ID_1, TASK_DIR_FRONT, "1_3"],
-		[4, TASK_ID_1, TASK_DIR_FRONT, "1_4"],
-		[5, TASK_ID_1, TASK_DIR_FRONT, "1_5"],
-		[6, TASK_ID_1, TASK_DIR_FRONT, "1_6"],
-		[7, TASK_ID_1, TASK_DIR_FRONT, "1_7"],
-		[8, TASK_ID_1, TASK_DIR_FRONT, "1_8"],
-		[9, TASK_ID_1, TASK_DIR_FRONT, "1_9"],
-		[10, TASK_ID_1, TASK_DIR_FRONT, "1_10"],
-
-		[1, TASK_ID_2, TASK_DIR_FRONT, "2_1"],
-		[2, TASK_ID_2, TASK_DIR_FRONT, "2_2"],
-		[3, TASK_ID_2, TASK_DIR_FRONT, "2_3"],
-		[4, TASK_ID_2, TASK_DIR_FRONT, "2_4"],
-		[5, TASK_ID_2, TASK_DIR_FRONT, "2_5"],
-		[6, TASK_ID_2, TASK_DIR_FRONT, "2_6"],
-		[7, TASK_ID_2, TASK_DIR_FRONT, "2_7"],
-		[8, TASK_ID_2, TASK_DIR_FRONT, "2_8"],
-		[9, TASK_ID_2, TASK_DIR_FRONT, "2_9"],
-		[10, TASK_ID_1, TASK_DIR_FRONT, "2_10"],
-
-		[1, TASK_ID_3, TASK_DIR_FRONT, "3_1"],
-		[2, TASK_ID_3, TASK_DIR_FRONT, "3_2"],
-		[3, TASK_ID_3, TASK_DIR_FRONT, "3_3"],
-		[4, TASK_ID_3, TASK_DIR_FRONT, "3_4"],
-		[5, TASK_ID_3, TASK_DIR_FRONT, "3_5"],
-		[6, TASK_ID_3, TASK_DIR_FRONT, "3_6"],
-		[7, TASK_ID_3, TASK_DIR_FRONT, "3_7"],
-		[8, TASK_ID_3, TASK_DIR_FRONT, "3_8"],
-		[9, TASK_ID_3, TASK_DIR_FRONT, "3_9"],
-		[10, TASK_ID_3, TASK_DIR_FRONT, "3_10"],
+		# [1, TASK_ID_3, TASK_DIR_BACK, "1_1"],
+		# [2, TASK_ID_3, TASK_DIR_BACK, "1_2"],
+		# [3, TASK_ID_3, TASK_DIR_BACK, "1_3"],
+		# [4, TASK_ID_3, TASK_DIR_BACK, "1_4"],
+		# [5, TASK_ID_3, TASK_DIR_BACK, "1_5"],
+		# [6, TASK_ID_3, TASK_DIR_BACK, "1_6"],
+		# [7, TASK_ID_3, TASK_DIR_BACK, "1_7"],
+		# [8, TASK_ID_3, TASK_DIR_BACK, "1_8"],
+		# [9, TASK_ID_3, TASK_DIR_BACK, "1_9"],
+		# [10, TASK_ID_3, TASK_DIR_BACK, "1_10"],
 
 		# [2, TASK_ID_2, TASK_DIR_FRONT, '2_2'],
 		# [3, TASK_ID_3, TASK_DIR_FRONT, "3_3"],
-		# [11, TASK_ID_11_R, TASK_DIR_FRONT, "11_R"],
-		# [11, TASK_ID_11_Y, TASK_DIR_FRONT, "11_Y"],
-		# [11, TASK_ID_11_B, TASK_DIR_FRONT, "11_B"],
+		[11, TASK_ID_11_R, TASK_DIR_FRONT, "11_R"],
+		[11, TASK_ID_11_Y, TASK_DIR_FRONT, "11_Y"],
+		[11, TASK_ID_11_B, TASK_DIR_FRONT, "11_B"],
 
 		# [4, TASK_ID_X1, TASK_DIR_FRONT],
 		# [5, TASK_ID_X2, TASK_DIR_FRONT],
@@ -328,6 +292,7 @@ def main():
 	task_id, pos, direction = 0, 0, 0
 
 	next_task_index = 0
+
 	while True:
 		print("TASK To DO: ", task_list[next_task_index][3])
 		while True:
