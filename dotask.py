@@ -1,13 +1,14 @@
 from correct import *
 from move1 import *
+
+
 def complete_1(place, direction):
 	if direction == TASK_DIR_FRONT or direction == TASK_DIR_BACK:
 		correction()
 		ability = [1, 2, 3, 4, 5, 6, 7, 9, 10]
 		if place in ability:
 			line_navigation(20, 1.5)
-		ability = [8]
-		if place in ability:
+		else:
 			line_navigation(20, 2.5)
 	else:
 		ability = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -67,38 +68,27 @@ def complete_3(place, direction):
 		correction()
 		if place == 8:
 			line_navigation(20, 2)
-		else:
-			line_navigation(20, 1)
 		# 往后退一定距离，准备动作
-		move(-pie / 2, 0, 10, 0.4, 0, 1)  # 退后一点点
-		stop_and_sleep()
-		correction()
+		move(-pie / 2, 0, 10)  # 退后一点点
+		value = get_sensor_data()[1]
+		while value[0] < 2000 and value[4] < 2000:
+			value = get_sensor_data()[1]
+		stop()
 
 		# 第一次往下啄
-		robot.set_motor(4, 10)  # 向下啄
-		robot.sleep(1.3)
-		robot.set_motor(4, -50)  # 抬起鸡嘴
-		robot.sleep(0.13)
+		robot.set_motor(4, 30)  # 向下啄
+		robot.sleep(0.4)
+		robot.set_motor(4, -100)  # 抬起鸡嘴
+		robot.sleep(0.06)
 		robot.set_motor(4, 0)
 		stop_and_sleep()
 
 		# 前进到底顶住道具
-		line_navigation(15, 0.5)
-		correction()
-		move(pie / 2, 0, 10)
+		line_navigation(30, 0.5)
 
 		# 开始钩道具动作
-		for i in range(3):  # 反复通红色方块使其归位
-			robot.set_motor(4, 6)  # 向下啄
-			robot.sleep(0.8)
-			robot.set_motor(4, -3)
-			robot.sleep(0.5)
-			robot.set_motor(4, -100)  # 抬起鸡嘴
-			robot.sleep(0.03)
-			robot.set_motor(4, 0)
-			stop_and_sleep()
-		robot.set_motor(4, 6)  # 钩住
-		robot.sleep(0.6)
+		robot.set_motor(4, 20)  # 钩住
+		robot.sleep(0.17)
 		robot.set_motor(4, 0)
 
 		# 往后退
@@ -106,42 +96,13 @@ def complete_3(place, direction):
 		robot.sleep(1)
 
 		# 往前走适配goback
+		robot.set_motor(4, -100)  # 抬起鸡嘴
+		robot.sleep(0.06)
+		robot.set_motor(4, 0)
 		move(pie / 2, 0, 20, 1)
 		stop()
 
 
-# def finish_1(place, direction):
-# 	if direction == 1 or direction == 3:
-# 		# 前往
-# 		move_to(place)
-# 		stop()
-# 		# robot.sleep(3)
-# 		# # 完成
-# 		complete_1(place)
-# 		# # 返回
-# 		# go_back(place)
-#
-#
-# def finish_2(place, direction):
-# 	if direction == 1:
-# 		# 前往
-# 		move_to(place)
-# 		stop()
-# 		# # 完成
-# 		complete_2(place)
-# 		# # 返回
-# 		# go_back(place)
-#
-#
-# def finish_3(place, direction):
-# 	if direction == 1 or direction == 3:
-# 		# 前往
-# 		move_to(place)
-# 		stop_and_sleep()
-# 		# 完成
-# 		complete_3(place, direction)
-# 		# 返回
-# 		go_back(place)
 
 
 def do_complete_task_pos11(task):
