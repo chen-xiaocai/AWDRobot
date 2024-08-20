@@ -58,6 +58,19 @@ def stop():
 	robot.set_motor(2, 0)
 	robot.set_motor(3, 0)
 
+TASK_DIR_FRONT = 0
+TASK_DIR_LEFT = 1
+TASK_DIR_RIGHT = 2
+TASK_DIR_BACK = 3
+
+TASK_ID_1 = 0  # 一号任务
+TASK_ID_2 = 1  # 二号任务
+TASK_ID_3 = 2  # 三号任务
+TASK_ID_11_R = 3  # 11号位置红色方块落脚点闸门
+TASK_ID_11_Y = 4  # 11号位置黄色方块落脚点闸门
+TASK_ID_11_B = 5  # 11号位置旋转门大任务
+TASK_ID_X1 = 6  # 现场任务1
+TASK_ID_X2 = 7  # 现场任务2
 
 def move(direction, angle, speed, time=0.0, distance=0, is_first=0):
 	f0 = speed
@@ -189,6 +202,7 @@ def baby_navigation(speed, time=0):
 
 # 如果初始状态前排传感器外侧通道识别到线就往前以移动至脱离
 def navigate_to_next_cross(speed):
+	robot.set_motor(3, 0)
 	global p_dis, p_ang, p_baby
 	p_dis = 0
 	p_ang = 0

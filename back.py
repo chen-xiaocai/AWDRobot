@@ -17,7 +17,7 @@ def go_back_2():  # 车顶着道具
 
 
 def go_back_3():  # 车顶着道具
-	move(-pie / 2, 0, 30, 0.3, 0, 1)
+	move(-pie / 2, 0, 30, 0.5, 0, 1)
 	move(0, 300, 0, 0.5)
 	stop_and_sleep()
 	navigate_to_next_cross(30)
@@ -116,10 +116,3 @@ def go_back_10():
 	move(-pie / 2, 0, 20, 1, 0, 1)
 	move(-pie*3/4, 0, 50, 2, 0, 1)
 	stop()
-
-
-def go_back(from_pos):
-	func = [go_back_1, go_back_2, go_back_3, go_back_4, go_back_5, go_back_6, go_back_7, go_back_8,
-			go_back_9, go_back_10]
-
-	func[from_pos-1]()

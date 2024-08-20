@@ -224,7 +224,6 @@ def move_to_7_():
 	stop()
 	add_event(14)
 
-
 def move_to_8():  # 无特殊要求	路口掉头
 	move(2.7, 0, 30, 0, 0, 1)
 	sleep_until(4, 2, 1, 1)
@@ -312,6 +311,3 @@ def move_to_11():  # 1、3号轮贴边	后排传感器脱离路口
 	robot.set_motor(4, 100)  # 将机械臂放下
 	robot.sleep(0.1)
 	robot.set_motor(4, 0)
-
-
-
