@@ -1,5 +1,5 @@
 from correct import *
-from move1 import *
+from moveF import *
 
 
 def complete_1(place, direction):
@@ -11,10 +11,9 @@ def complete_1(place, direction):
 		else:
 			line_navigation(20, 2.5)
 	else:
-		ability = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-		if place in ability:
-			move(pie / 2, 0, 20, 1.5)
-			stop()
+		# 包含了LEFT & RIGHT
+		move(pie / 2, 0, 20, 1.5)
+		stop()
 
 
 def complete_2(place, direction):
@@ -31,8 +30,7 @@ def complete_2(place, direction):
 			while robot.get_encoder(4) < 1100:
 				pass
 			robot.set_motor(4, 0)
-		ability = [8]
-		if place in ability:
+		elif place == 8:
 			line_navigation(20, 1.5)
 			stop_and_sleep()
 			move(0, 0, 20, 0.1)
@@ -42,16 +40,22 @@ def complete_2(place, direction):
 			while robot.get_encoder(4) < 1100:
 				pass
 			robot.set_motor(4, 0)
-	else:
-		move(pie / 2, 0, 20, 0.8)
-		stop_and_sleep()
-		move(0, 0, 20, 0.1)
-		stop_and_sleep()
-		robot.reset_encoder(4)
-		robot.set_motor(4, 100)
-		while robot.get_encoder(4) < 1100:
+		else:
 			pass
-		robot.set_motor(4, 0)
+	# elif direction == TASK_DIR_BACK:
+	# 	# 处理direction == back
+	# 	move(pie / 2, 0, 20, 0.8)
+	# 	stop_and_sleep()
+	# 	move(0, 0, 20, 0.1)
+	# 	stop_and_sleep()
+	# 	robot.reset_encoder(4)
+	# 	robot.set_motor(4, 100)
+	# 	while robot.get_encoder(4) < 1100:
+	# 		pass
+	# 	robot.set_motor(4, 0)
+	else:
+		# TODO: Front已经调试通过，BACK不支持，左右代码没有调试通过
+		raise ValueError("{} not supported".format(direction))
 
 
 def complete_3(place, direction):
@@ -101,8 +105,9 @@ def complete_3(place, direction):
 		robot.set_motor(4, 0)
 		move(pie / 2, 0, 20, 1)
 		stop()
-
-
+	else:
+		# 左右模式没有调试过
+		raise ValueError("{} not supported".format(direction))
 
 
 def do_complete_task_pos11(task):

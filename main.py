@@ -1,43 +1,37 @@
 import robot
-from move1 import *
+from base import *
+from moveF import *
+# from moveL import *
+# from moveR import *
 from dotask import *
-from back import *
-
-
+from backF import *
+# from backL import *
+# from backR import *
 
 def move_to(destination, direction):
-	func = [None, move_to_1, move_to_2, move_to_3, move_to_4, move_to_5, move_to_6, move_to_7, move_to_8, move_to_9,
-			 move_to_10, move_to_11]
-	func_left = []
-	func_right = []
-	# func_left = [None, move_to_1_left, move_to_2_left, move_to_3_left, move_to_4_left, None,
-	# 			 move_to_6_left, move_to_7_left, move_to_8_left, move_to_9_left, move_to_10_left]
-	# func_right = [None, move_to_1_right, move_to_2_right, move_to_3_right, move_to_4_right, None,
-	# 			 move_to_6_right, move_to_7_right, move_to_8_right, move_to_9_right, move_to_10_right]
 	if direction == TASK_DIR_FRONT or direction == TASK_DIR_BACK:
-		func[destination]()
+		func = [None, move_to_1, move_to_2, move_to_3, move_to_4, move_to_5, move_to_6, move_to_7, move_to_8, move_to_9,
+				 move_to_10, move_to_11]
 	elif direction == TASK_DIR_LEFT:
-		func_left[destination]()
+		func = [None, move_to_1_left, move_to_2_left, move_to_3_left, move_to_4_left, None,
+				 move_to_6_left, move_to_7_left, move_to_8_left, move_to_9_left, move_to_10_left]
 	else:
-		func_right[destination]()
+		func = [None, move_to_1_right, move_to_2_right, move_to_3_right, move_to_4_right, None,
+				 move_to_6_right, move_to_7_right, move_to_8_right, move_to_9_right, move_to_10_right]
+	func[destination]()
 
 
 def go_back(from_pos, direction):
-	func = [None, go_back_1, go_back_2, go_back_3, go_back_4, go_back_5, go_back_6, go_back_7, go_back_8,
-			go_back_9, go_back_10]
-	func_left = []
-	func_right = []
-
-	# func_left = [None, go_back_1_left, go_back_2_left, go_back_3_left, go_back_4_left, go_back_5_left, go_back_6_left, go_back_7_left, go_back_8_left,
-	# 		go_back_9_left, go_back_10_left]
-	# func_right = [None, go_back_1_right, go_back_2_right, go_back_3_right, go_back_4_right, go_back_5_right, go_back_6_right, go_back_7_right, go_back_8_right,
-	# 		go_back_9_right, go_back_10_right]
 	if direction == TASK_DIR_FRONT or direction == TASK_DIR_BACK:
-		func[from_pos]()
+		func = [None, go_back_1, go_back_2, go_back_3, go_back_4, go_back_5, go_back_6, go_back_7, go_back_8,
+				go_back_9, go_back_10]
 	elif direction == TASK_DIR_LEFT:
-		func_left[from_pos]()
+		func = [None, go_back_1_left, go_back_2_left, go_back_3_left, go_back_4_left, go_back_5_left, go_back_6_left, go_back_7_left, go_back_8_left,
+			go_back_9_left, go_back_10_left]
 	else:
-		func_right[from_pos]()
+		func = [None, go_back_1_right, go_back_2_right, go_back_3_right, go_back_4_right, go_back_5_right, go_back_6_right, go_back_7_right, go_back_8_right,
+			go_back_9_right, go_back_10_right]
+	func[from_pos]()
 
 
 def execute_task(position, task_id, direction):
